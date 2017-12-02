@@ -1,0 +1,32 @@
+version: '3'
+services:
+  nginx:
+    build: ./nginx
+    image: xhgui/nginx:alpine
+    ports:
+      - 10008:80
+    volumes:
+      - /srv/xhgui:/var/www/html/xhgui
+      - ./nginx/xhgui.conf:/etc/nginx/conf.d/default.conf
+      - log_rsyslog:/var/run/rsyslog/dev 
+    restart: unless-stopped
+
+  php:
+    build: ./php
+    image: xhgui/php:5-fpm-alpine
+    volumes:
+      - ./php/xhgui.config.php:/var/www/html/xhgui/config/config.php
+      - ./php/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
+      - log_rsyslog:/var/run/rsyslog/dev 
+    networks:
+      - default
+      - test
+    restart: unless-stopped
+
+networks:
+  test:
+    external: true
+
+volumes:
+  log_rsyslog:
+    external: true
